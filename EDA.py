@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 
 
 df = pd.read_csv("data/main.csv")
+print(df.info())
 NULL_COLUMNS = [
     'Duplicate Permissions Requested', 'Permissions Requested', 'Services Declared',
     'Broadcast Receivers', 'Content Providers Declared', 'Metadata Elements',
@@ -38,7 +39,23 @@ df.drop(columns=low_var_cols, inplace=True)
 corr_matrix = df[binary_cols].corr().abs()
 upper_tri = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
 high_corr_features = [column for column in upper_tri.columns if any(upper_tri[column] > 0.95)]
+high_corr_features.remove('Contact Information Theft')
+to_not_remove = [
+    'GPS Spoofing',
+    'Activities Declared',
+    'Is App Taking Backup',
+    'Screen Logging',
+    # 'Permissions Requested',
+    # 'Services Declared',
+    # 'Broadcast Receivers'
+]
+# high_corr_features.remove('GPS spooking')
+# high_corr_features.remove('GPS spooking')
 df.drop(columns=high_corr_features, inplace=True)
+for tnr in to_not_remove:
+    if tnr in high_corr_features:
+        high_corr_features.remove(tnr)
+
 corr_target = df.corrwith(df['Label']).sort_values(ascending=False)
 
 print(corr_target.head(5))

@@ -41,12 +41,18 @@ model_features = [
     'Services Declared', 'Broadcast Receivers', 'Content Providers Declared',
     'Metadata Elements', 'Version Code', 'Target SDK Version', 'Is App Taking Backup'
 ]
-
+TO_KEEP = [
+    'GPS Spoofing',
+    'Activities Declared',
+    'Is App Taking Backup',
+    'Screen Logging',
+]
 for col in model_features:
     if col not in test_df.columns:
         test_df[col] = 0
 
-X_test = test_df[model_features]
+X_test = test_df[TO_KEEP]
+# X_test = test_df[model_features]
 
 pred_labels = model.predict(X_test)
 
@@ -56,5 +62,5 @@ output = pd.DataFrame({
     'Label': pred_labels
 })
 
-output.to_csv("data/predictions.csv", index=False)
+output.to_csv("data/{sno}.csv".format(sno=input("Enter the serial number for the output file: ")), index=False)
 print(output.head(10))

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report
 )
@@ -13,13 +14,32 @@ df = pd.read_csv("data/processed_train.csv")
 X = df.drop(columns=["Label"])
 y = df["Label"]
 
+print(X.info())
+TO_KEEP = [
+    'GPS Spoofing',
+    'Activities Declared',
+    'Is App Taking Backup',
+    'Screen Logging',
+]
+# TO_KEEP = ['Content Providers Declared',
+#            'Metadata Elements',
+#            'Duplicate Permissions Requested', 
+#            'Target SDK Version', 
+#            'Is App Taking Backup',
+#            'Permissions Requested',
+#            'Version Code',
+#            ]
+X = X[TO_KEEP]
+
+print(X.info())
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 print(f"train shape: {X_train.shape} & test shape: {X_test.shape}")
 
 rf = RandomForestClassifier(
-    n_estimators=200,       
+    n_estimators=1200,       
     max_depth=None,       
     min_samples_split=4,    
     class_weight='balanced',
@@ -27,6 +47,16 @@ rf = RandomForestClassifier(
     n_jobs=-1       
 )
 
+# rf = xgb = XGBClassifier(
+#     n_estimators=500,
+#     max_depth=16,          # deeper trees for complex patterns
+#     learning_rate=0.05,   # smaller learning rate = smoother learning
+#     subsample=0.8,
+#     colsample_bytree=0.8,
+#     reg_lambda=1,
+#     random_state=42,
+#     n_jobs=-1
+# )
 rf.fit(X_train, y_train)
 
 y_pred = rf.predict(X_test)
@@ -70,5 +100,6 @@ plt.ylabel("Feature")
 plt.tight_layout()
 plt.show()
 
+rf = rf.fit(X, y)
 import joblib
 joblib.dump(rf, "models/random_forest_model.pkl")
